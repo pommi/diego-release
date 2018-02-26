@@ -109,9 +109,6 @@ properties:
   diego.ssl.skip_cert_verify:
     description: "when connecting over https, ignore bad ssl certificates"
     default: false
-  diego.executor.ca_certs_for_downloads:
-    description: "Concatenation of trusted CA certificates to be used when downloading assets. Deprecated in favor of tls.ca_cert."
-    default: null
   tls.cert:
     description: "REQUIRED: PEM-encoded tls certificate that can be used for client or server auth"
   tls.key:
