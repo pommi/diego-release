@@ -1,6 +1,0 @@
----
-name: golang-windows
-
-files:
-  - golang/go1.9.6.windows-amd64.zip
-  - exiter.ps1
