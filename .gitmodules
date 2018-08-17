@@ -2,10 +2,6 @@
 	path = src/github.com/tedsuo/ifrit
 	url = https://github.com/tedsuo/ifrit
 	branch = master
-[submodule "src/github.com/onsi/gomega"]
-	path = src/github.com/onsi/gomega
-	url = https://github.com/onsi/gomega
-	branch = master
 [submodule "src/github.com/cloudfoundry-incubator/cf-test-helpers"]
 	path = src/github.com/cloudfoundry-incubator/cf-test-helpers
 	url = https://github.com/cloudfoundry-incubator/cf-test-helpers
@@ -13,10 +9,6 @@
 [submodule "src/github.com/ajstarks/svgo"]
 	path = src/github.com/ajstarks/svgo
 	url = https://github.com/ajstarks/svgo
-[submodule "src/github.com/onsi/ginkgo"]
-	path = src/github.com/onsi/ginkgo
-	url = https://github.com/onsi/ginkgo
-	branch = master
 [submodule "src/github.com/cloudfoundry/gosteno"]
 	path = src/github.com/cloudfoundry/gosteno
 	url = https://github.com/cloudfoundry/gosteno
@@ -288,9 +280,6 @@
 [submodule "src/code.cloudfoundry.org/uaa-go-client"]
 	path = src/code.cloudfoundry.org/uaa-go-client
 	url = https://github.com/cloudfoundry-incubator/uaa-go-client
-[submodule "src/code.cloudfoundry.org/routing-api"]
-	path = src/code.cloudfoundry.org/routing-api
-	url = https://github.com/cloudfoundry-incubator/routing-api
 [submodule "src/code.cloudfoundry.org/trace-logger"]
 	path = src/code.cloudfoundry.org/trace-logger
 	url = https://github.com/cloudfoundry-incubator/trace-logger

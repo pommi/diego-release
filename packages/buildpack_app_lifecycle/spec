@@ -29,17 +29,17 @@ files:
   - code.cloudfoundry.org/goshims/osshim/*.go # gosub
   - code.cloudfoundry.org/lager/*.go # gosub
   - code.cloudfoundry.org/systemcerts/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/auth/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/auth/uaa/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/credentials/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/credentials/generate/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/credentials/values/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/permissions/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/credhub/server/*.go # gosub
-  - github.com/cloudfoundry-incubator/credhub-cli/vendor/github.com/hashicorp/go-version/*.go # gosub
-  - github.com/cyphar/filepath-securejoin/*.go # gosub
-  - github.com/cyphar/filepath-securejoin/vendor/github.com/pkg/errors/*.go # gosub
-  - golang.org/x/sys/windows/*.go # gosub
-  - golang.org/x/sys/windows/*.s # gosub
-  - gopkg.in/yaml.v2/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/auth/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/auth/uaa/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/credentials/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/credentials/generate/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/credentials/values/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/permissions/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cloudfoundry-incubator/credhub-cli/credhub/server/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/cyphar/filepath-securejoin/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/hashicorp/go-version/*.go # gosub
+  - code.cloudfoundry.org/vendor/github.com/pkg/errors/*.go # gosub
+  - code.cloudfoundry.org/vendor/golang.org/x/sys/windows/*.go # gosub
+  - code.cloudfoundry.org/vendor/golang.org/x/sys/windows/*.s # gosub
+  - code.cloudfoundry.org/vendor/gopkg.in/yaml.v2/*.go # gosub
