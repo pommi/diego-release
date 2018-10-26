@@ -13,6 +13,9 @@ templates:
   loggregator_ca.crt.erb: config/certs/loggregator/ca.crt
   loggregator_client.crt.erb: config/certs/loggregator/client.crt
   loggregator_client.key.erb: config/certs/loggregator/client.key
+  backend_tls_ca.crt.erb: config/certs/backend_tls/ca.crt
+  backend_tls_client.crt.erb: config/certs/backend_tls/client.crt
+  backend_tls_client.key.erb: config/certs/backend_tls/client.key
 
 provides:
 - name: ssh_proxy
@@ -98,6 +101,17 @@ properties:
   enable_consul_service_registration:
     description: "Enable the ssh-proxy to register itself as a service with Consul, for client discovery via Consul DNS. Do not disable without arranging alternate service discovery."
     default: true
+
+  backends.tls.enabled:
+    default: false
+    description: "Whether to enable TLS-proxied connections to target backend instances."
+  backends.tls.ca_certificates:
+    default: []
+    description: "List of PEM-encoded CA certificate bundles for the SSH proxy to use to verify backends when connecting via TLS proxy. Should be non-empty if `backends.tls.enabled` is enabled."
+  backends.tls.client_certificate:
+    description: "PEM-encoded certificate for the SSH proxy to present to backends for verification when connecting via TLS proxy."
+  backends.tls.client_private_key:
+    description: "PEM-encoded private key associated to backends.tls.client_certificate."
 
   logging.format.timestamp:
     description: "Format for timestamp in component logs. Valid values are 'unix-epoch' and 'rfc3339'."

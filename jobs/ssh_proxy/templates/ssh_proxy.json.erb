@@ -22,6 +22,10 @@
   config[:bbs_client_key] = "/var/vcap/jobs/ssh_proxy/config/certs/bbs/client.key"
   config[:bbs_ca_cert] = "/var/vcap/jobs/ssh_proxy/config/certs/bbs/ca.crt"
 
+  config[:backend_tls_client_cert] = "/var/vcap/jobs/ssh_proxy/config/certs/backend_tls/client.crt"
+  config[:backend_tls_client_key] = "/var/vcap/jobs/ssh_proxy/config/certs/backend_tls/client.key"
+  config[:backend_tls_ca_cert] = "/var/vcap/jobs/ssh_proxy/config/certs/backend_tls/ca.crt"
+
   if p("diego.ssh_proxy.enable_diego_auth") then
     config[:enable_diego_auth] = true
     config[:diego_credentials] =p("diego.ssh_proxy.diego_credentials")
