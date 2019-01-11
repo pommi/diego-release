@@ -2,6 +2,7 @@
 name: locket
 
 templates:
+  dns-health.erb: bin/dns/healthy
   locket_ctl.erb: bin/locket_ctl
   locket_as_vcap.erb: bin/locket_as_vcap
   locket.json.erb: config/locket.json
@@ -19,6 +20,10 @@ templates:
 packages:
   - pid_utils
   - locket
+
+provides:
+- name: locket
+  type: locket
 
 properties:
   bpm.enabled:

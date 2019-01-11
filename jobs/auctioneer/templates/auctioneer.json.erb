@@ -54,6 +54,13 @@
 
   if_p("diego.auctioneer.locket.api_location") do |value|
     config[:locket_address] = value
+  end
+
+  if_link("locket") do |link|
+    config[:locket_address] = "#{link.address}:8891"
+  end
+
+  if config[:locket_address]
     config[:uuid] = spec.id
     config[:locket_ca_cert_file] = "#{conf_dir}/certs/bbs/ca.crt"
     config[:locket_client_cert_file] = "#{conf_dir}/certs/bbs/client.crt"
