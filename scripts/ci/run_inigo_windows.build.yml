@@ -1,0 +1,24 @@
+
+platform: windows
+
+inputs:
+- name: diego-release
+- name: garden-runc-release
+- name: routing-release
+
+params:
+  GINKGO_PARALLEL: "true" # we check for the literal string "true" in the run_inigo script
+  DEFAULT_EVENTUALLY_TIMEOUT:
+  START_CHECK_TIMEOUT_DURATION:
+  INIGO_REPEAT_COUNT: 1
+  SKIP_PACKAGES:
+  SKIP_REGEX:
+  SQL_FLAVOR: mysql
+
+run:
+  path: powershell
+  args:
+  - "-ExecutionPolicy"
+  - "Bypass"
+  - "-File"
+  - diego-release/scripts/ci/run_inigo.ps1
