@@ -36,6 +36,7 @@ function Build-Gdn {
 
 # Kill any existing garden servers
   Kill-Garden
+  Pop-Location
   Write-Host "Finished Build-Gdn"
 }
 
@@ -133,22 +134,23 @@ function Install-Ginkgo() {
   Write-Host "Starting Install-Ginkgo"
   Push-Location $dir
   go install github.com/onsi/ginkgo/ginkgo
+  $env:PATH="$env:PATH;$PWD/bin"
   Pop-Location
   Write-Host "Finished Install-Ginkgo"
 }
 
-# Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/ginkgo
-# Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/gomega
+Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/ginkgo
+Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/gomega
 
 # setup_dnsmasq
 
-# Build-Gdn "$PWD/garden-runc-release"
+Build-Gdn "$PWD/garden-runc-release"
 #
-# $env:ROUTER_GOPATH="$PWD/routing-release"
-# $env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
+$env:ROUTER_GOPATH="$PWD/routing-release"
+$env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
 #
-# Setup-Gopath "$PWD/diego-release"
-# Install-Ginkgo "$PWD/diego-release"
+Setup-Gopath "$PWD/diego-release"
+Install-Ginkgo "$PWD/diego-release"
 
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
 $env:AUCTIONEER_GOPATH=${env:GOPATH_ROOT}
@@ -161,6 +163,14 @@ $env:ROUTE_EMITTER_GOPATH=${env:GOPATH_ROOT}
 $env:SSHD_GOPATH=${env:GOPATH_ROOT}
 $env:SSH_PROXY_GOPATH=${env:GOPATH_ROOT}
 $env:GARDEN_GOPATH=${env:GOPATH_ROOT}
+$env:GROOTFS_BINPATH="C:\groot"
+$env:GARDEN_BINPATH="C:\garden-runc-release\gdn.exe"
+
+$env:GARDEN_ROOTFS="docker:///cloudfoundry/windows2016fs:2019"
+$env:GARDEN_GRAPH_PATH="C:\var\vcap\data\groot\store"
+& "$env:GROOTFS_BINPATH\grootfs.exe" --driver-store "$env:GARDEN_GRAPH_PATH" pull "$env:GARDEN_ROOTFS"
+$env:EXTERNAL_ADDRESS="10.80.139.55"
+
 
 # used for routing to apps; same logic that Garden uses.
 # EXTERNAL_ADDRESS=$(ip route get 8.8.8.8 | sed 's/.*src\s\(.*\)\s/\1/;tx;d;:x')
