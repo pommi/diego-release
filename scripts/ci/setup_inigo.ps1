@@ -1,156 +1,134 @@
 $ErrorActionPreference = "Stop";
 trap { $host.SetShouldExit(1) }
 
-Write-Host "Starting setup_inigo"
-$env:TMP_HOME=($pwd).path
 $env:GOROOT="C:\var\vcap\packages\golang-1.12-windows\go"
-$env:PATH= "$env:GOROOT/bin;$env:PATH"
+$env:PATH= "$env:GOROOT\bin;$env:PATH"
 
-# # Setup DNS for *.service.cf.internal, used by the Diego components, and
-# # *.test.internal, used by the collocated DUSTs as a routable domain.
-# function setup_dnsmasq() {
-#   local host_addr
-#   host_addr=$(ip route get 8.8.8.8 | head -n1 | awk '{print $NF}')
-#
-#   dnsmasq --address=/service.cf.internal/127.0.0.1 --address=/test.internal/${host_addr}
-#   echo -e "nameserver $host_addr\n$(cat /etc/resolv.conf)" > /etc/resolv.conf
-# }
+function Build-GardenRunc(){
+	param([string] $gardenRuncDir, [string] $wincReleaseDir)
 
-function Kill-Garden {
-  Get-Process | foreach { if ($_.name -eq "gdn") { kill -Force $_.Id } }
-}
+  Write-Host "Building garden-runc"
+  $env:GARDEN_RUNC_PATH = $gardenRuncDir
+  $env:WINC_RELEASE_PATH = $wincReleaseDir
 
-function Build-Gdn {
-	param([string] $dir)
-  Write-Host "Starting Build-Gdn"
-  push-location $dir
-  $env:GOPATH="$PWD/src/gopath"
-  mkdir ./src/gopath/src/code.cloudfoundry.org -ea 0
-    if (Test-Path ./src/guardian) {
-      mv ./src/guardian ./src/gopath/src/code.cloudfoundry.org/
-    }
-  go build -o gdn.exe ./src/gopath/src/code.cloudfoundry.org/guardian/cmd/gdn
+  push-location $env:GARDEN_RUNC_PATH
+    $env:PATH = "$PWD\bin;$env:PATH"
+    $env:GARDEN_BINPATH = "$PWD\bin"
+
+    mkdir -Force "$env:GARDEN_RUNC_PATH\bin"
+
+    push-location ".\src\guardian"
+      go build -mod vendor -o "$env:GARDEN_BINPATH\init.exe" ".\cmd\winit"
+      if ($LastExitCode -ne 0) {
+	throw "Building init.exe process returned error code: $LastExitCode"
+      }
+    pop-location
+  pop-location
+
+
+  push-location $env:WINC_RELEASE_PATH
+    mkdir -Force "$env:WINC_RELEASE_PATH\bin"
+
+    $env:GROOTFS_BINPATH = "$env:GARDEN_BINPATH"
+
+    bosh sync-blobs
     if ($LastExitCode -ne 0) {
-      throw "Building gdn.exe process returned error code: $LastExitCode"
+      throw "Syncing winc bosh blobs returned error code: $LastExitCode"
+    }
+    $mingwPath=(Get-ChildItem "blobs\mingw\x86_64-*.zip").FullName
+    Expand-Archive -Path "$mingwPath" -DestinationPath "$env:WINC_RELEASE_PATH\bin"
+    $env:PATH = "$PWD\bin\mingw64\bin;$env:PATH"
+
+    $env:GOPATH="$PWD"
+
+    go build -o "$env:GARDEN_BINPATH\nstar.exe" "nstar"
+    if ($LastExitCode -ne 0) {
+      throw "Building nstar.exe process returned error code: $LastExitCode"
     }
 
-# Kill any existing garden servers
-  Kill-Garden
-  Pop-Location
-  Write-Host "Finished Build-Gdn"
+    go build -o "$env:GROOTFS_BINPATH\grootfs.exe" "code.cloudfoundry.org/groot-windows"
+    if ($LastExitCode -ne 0) {
+      throw "Building grootfs.exe process returned error code: $LastExitCode"
+    }
+
+    gcc -c ".\src\code.cloudfoundry.org\groot-windows\volume\quota\quota.c" -o "$env:GROOTFS_BINPATH\quota.o"
+    if ($LastExitCode -ne 0) {
+      throw "Building quota.o process returned error code: $LastExitCode"
+    }
+
+    gcc -shared -o "$env:GROOTFS_BINPATH\quota.dll" "$env:GROOTFS_BINPATH\quota.o" -lole32 -loleaut32
+    if ($LastExitCode -ne 0) {
+      throw "Building quota.dll process returned error code: $LastExitCode"
+    }
+
+    go build -o "$env:GARDEN_BINPATH\winc.exe" "code.cloudfoundry.org/winc/cmd/winc"
+    if ($LastExitCode -ne 0) {
+      throw "Building winc.exe process returned error code: $LastExitCode"
+    }
+
+    go build -o "$env:GARDEN_BINPATH\winc-network.exe" -tags "hnsAcls" "code.cloudfoundry.org/winc/cmd/winc-network"
+    if ($LastExitCode -ne 0) {
+      throw "Building winc-network.exe process returned error code: $LastExitCode"
+    }
+  pop-location
 }
 
-
-# create_garden_storage() {
-#   # Configure cgroup
-#   mount -t tmpfs cgroup_root /sys/fs/cgroup
-#   mkdir -p /sys/fs/cgroup/devices
-#   mkdir -p /sys/fs/cgroup/memory
-#
-#   mount -tcgroup -odevices cgroup:devices /sys/fs/cgroup/devices
-#   devices_mount_info=$(cat /proc/self/cgroup | grep devices)
-#   devices_subdir=$(echo $devices_mount_info | cut -d: -f3)
-#
-#   # change permission to allow us to run mknod later
-#   echo 'b 7:* rwm' > /sys/fs/cgroup/devices/devices.allow
-#   echo 'b 7:* rwm' > /sys/fs/cgroup/devices${devices_subdir}/devices.allow
-#
-#   # Setup loop devices
-#   for i in {0..256}
-#   do
-#     rm -f /dev/loop$i
-#     mknod -m777 /dev/loop$i b 7 $i
-#   done
-#
-#   # Make XFS volume
-#   truncate -s 8G /xfs_volume
-#   mkfs.xfs -b size=4096 /xfs_volume
-#
-#   # Mount XFS
-#   mkdir /mnt/garden-storage
-#   mount -t xfs -o pquota,noatime,nobarrier /xfs_volume /mnt/garden-storage
-#   chmod 777 -R /mnt/garden-storage
-#
-#   umount /sys/fs/cgroup/devices
-# }
-
-# build_grootfs () {
-#   echo "Building grootfs..."
-#   export GARDEN_RUNC_PATH=${PWD}/garden-runc-release
-#   export GROOTFS_BINPATH=${GARDEN_RUNC_PATH}/bin
-#   mkdir -p ${GROOTFS_BINPATH}
-#
-#   pushd ${GARDEN_RUNC_PATH}/src/grootfs
-#     export PATH=${GROOTFS_BINPATH}:${PATH}
-#
-#     # Set up btrfs volume and loopback devices in environment
-#     create_garden_storage
-#     umount /sys/fs/cgroup
-#
-#     make
-#
-#     mv $PWD/build/grootfs $GROOTFS_BINPATH
-#     echo "grootfs installed."
-#
-#     groupadd iamgroot -g 4294967294
-#     useradd iamgroot -u 4294967294 -g 4294967294
-#     echo "iamgroot:1:4294967293" > /etc/subuid
-#     echo "iamgroot:1:4294967293" > /etc/subgid
-#   popd
-# }
-
-# set_garden_rootfs () {
-#   # use the 1.29 version of tar that's installed in the inigo-ci docker image
-#   ln -sf /usr/local/bin/tar "${GARDEN_BINPATH}"
-#
-#   tar cpf /tmp/rootfs.tar -C /opt/inigo/rootfs .
-#   export GARDEN_ROOTFS=/tmp/rootfs.tar
-# }
+function Set-GardenRootfs() {
+  $env:GARDEN_ROOTFS="docker:///cloudfoundry/windows2016fs:2019"
+  $env:GROOTFS_STORE_PATH="C:\grootfs-store"
+  & "$env:GROOTFS_BINPATH\grootfs.exe" --driver-store "$env:GROOTFS_STORE_PATH" pull "$env:GARDEN_ROOTFS"
+  if ($LastExitCode -ne 0) {
+    throw "Pulling $env:GARDEN_ROOTFS returned error code: $LastExitCode"
+  }
+}
 
 function Setup-Gopath() {
 	param([string] $dir)
-  Write-Host "Starting Setup-Gopath"
+
   Push-Location $dir
+    bosh sync-blobs
+    if ($LastExitCode -ne 0) {
+      throw "Syncing diego bosh blobs returned error code: $LastExitCode"
+    }
 
-  bosh sync-blobs
+    # Have a way of copying envoy proxy
 
-  #Have a way of copying envoy proxy
+    $env:GOPATH_ROOT="$PWD"
 
-  $env:GOPATH_ROOT=($pwd).path
+    $env:GOPATH="${env:GOPATH_ROOT}"
+    $env:PATH="${env:GOPATH_ROOT}/bin:${env:PATH}"
 
-  $env:GOPATH="${env:GOPATH_ROOT}"
-  $env:PATH="${env:GOPATH_ROOT}/bin:${env:PATH}"
-
-  # install application dependencies
-  echo "Installing gnatsd ..."
-  go install github.com/apcera/gnatsd
-
+    # install application dependencies
+    echo "Installing gnatsd ..."
+    go install github.com/apcera/gnatsd
+    if ($LastExitCode -ne 0) {
+      throw "Installing gnatsd returned error code: $LastExitCode"
+    }
   Pop-Location
-  Write-Host "Finished Setup-Gopath"
 }
 
 function Install-Ginkgo() {
 	param([string] $dir)
-  Write-Host "Starting Install-Ginkgo"
   Push-Location $dir
-  go install github.com/onsi/ginkgo/ginkgo
-  $env:PATH="$env:PATH;$PWD/bin"
+    go install github.com/onsi/ginkgo/ginkgo
+    if ($LastExitCode -ne 0) {
+      throw "Installing ginkgo returned error code: $LastExitCode"
+    }
+    $env:PATH="$env:PATH;$PWD/bin"
   Pop-Location
-  Write-Host "Finished Install-Ginkgo"
 }
 
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/ginkgo
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/gomega
 
-# setup_dnsmasq
+Build-GardenRunc "$PWD\garden-runc-release" "$PWD\winc-release"
 
-Build-Gdn "$PWD/garden-runc-release"
-#
-$env:ROUTER_GOPATH="$PWD/routing-release"
+$env:ROUTER_GOPATH="$PWD\routing-release"
 $env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
-#
+
 Setup-Gopath "$PWD/diego-release"
 Install-Ginkgo "$PWD/diego-release"
+Set-GardenRootfs
 
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
 $env:AUCTIONEER_GOPATH=${env:GOPATH_ROOT}
@@ -163,14 +141,6 @@ $env:ROUTE_EMITTER_GOPATH=${env:GOPATH_ROOT}
 $env:SSHD_GOPATH=${env:GOPATH_ROOT}
 $env:SSH_PROXY_GOPATH=${env:GOPATH_ROOT}
 $env:GARDEN_GOPATH=${env:GOPATH_ROOT}
-$env:GROOTFS_BINPATH="C:\groot"
-$env:GARDEN_BINPATH="C:\garden-runc-release\gdn.exe"
-
-$env:GARDEN_ROOTFS="docker:///cloudfoundry/windows2016fs:2019"
-$env:GARDEN_GRAPH_PATH="C:\var\vcap\data\groot\store"
-& "$env:GROOTFS_BINPATH\grootfs.exe" --driver-store "$env:GARDEN_GRAPH_PATH" pull "$env:GARDEN_ROOTFS"
-$env:EXTERNAL_ADDRESS="10.80.139.55"
-
 
 # used for routing to apps; same logic that Garden uses.
 # EXTERNAL_ADDRESS=$(ip route get 8.8.8.8 | sed 's/.*src\s\(.*\)\s/\1/;tx;d;:x')

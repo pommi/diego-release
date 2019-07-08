@@ -9,7 +9,7 @@ $dir=[System.IO.Path]::GetDirectoryName($PSScriptRoot)
    $nodes_flag="-nodes=4"
  }
 
- Push-Location "${env:GOPATH_ROOT}/src/code.cloudfoundry.org/inigo"
+ Push-Location "${env:GOPATH_ROOT}\src\code.cloudfoundry.org\inigo"
    $PACKAGES_TO_SKIP="docker"
 
    if ( "$SKIP_PACKAGES" -ne "" ) {

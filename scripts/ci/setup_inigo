@@ -2,7 +2,6 @@
 
 set -ex
 
-export TMP_HOME=${PWD}
 export GOROOT=/usr/local/go
 export PATH=${GOROOT}/bin:${PATH}
 
