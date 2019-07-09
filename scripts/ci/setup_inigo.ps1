@@ -132,7 +132,7 @@ function Setup-Database() {
   cp $origCertFile $certFile
   cp $origKeyFile $keyFile
 
-  Set-Content -Path "C:\tools\mysql\current\my.ini" -Encoding UTF8 -Value "[mysqld]
+  Set-Content -Path "C:\tools\mysql\current\my.ini" -Encoding Ascii -Value "[mysqld]
 basedir=C:\\tools\\mysql\\current
 datadir=C:\\ProgramData\\MySQL\\data
 ssl-cert=$certFile
