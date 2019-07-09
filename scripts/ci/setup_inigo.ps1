@@ -118,6 +118,30 @@ function Install-Ginkgo() {
   Pop-Location
 }
 
+function Setup-Database() {
+  $origCaFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server-ca.crt"
+  $origCertFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.crt"
+  $origKeyFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.key"
+
+  $caFile="C:\mysql-certs\server-ca.crt"
+  $certFile="C:\mysql-certs\server.crt"
+  $keyFile="C:\mysql-certs\server.key"
+  mkdir -Force "C:\mysql-certs"
+
+  cp $origCaFile $caFile
+  cp $origCertFile $certFile
+  cp $origKeyFile $keyFile
+
+  Set-Content -Path "C:\tools\mysql\current\my.ini" -Encoding UTF8 -Value "[mysqld]
+basedir=C:\\tools\\mysql\\current
+datadir=C:\\ProgramData\\MySQL\\data
+ssl-cert=$certFile
+ssl-key=$keyFile
+ssl-ca=$caFile"
+
+Restart-Service Mysql
+}
+
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/ginkgo
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/gomega
 
@@ -129,6 +153,7 @@ $env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
 Setup-Gopath "$PWD/diego-release"
 Install-Ginkgo "$PWD/diego-release"
 Set-GardenRootfs
+Setup-Database
 
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
 $env:AUCTIONEER_GOPATH=${env:GOPATH_ROOT}
