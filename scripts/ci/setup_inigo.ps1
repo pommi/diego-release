@@ -18,7 +18,7 @@ function Build-GardenRunc(){
     mkdir -Force "$env:GARDEN_RUNC_PATH\bin"
 
     $tarPath = (Get-Command tar).source
-    cp -Force $tarPath "$env:GARDEN_BINPATH"
+    cp -ErrorAction SilentlyContinue -Force $tarPath "$env:GARDEN_BINPATH"
 
     push-location ".\src\guardian"
       go build -mod vendor -o "$env:GARDEN_BINPATH\init.exe" ".\cmd\winit"
@@ -83,6 +83,26 @@ function Set-GardenRootfs() {
   if ($LastExitCode -ne 0) {
     throw "Pulling $env:GARDEN_ROOTFS returned error code: $LastExitCode"
   }
+}
+
+function Setup-ContainerNetworking() {
+  Set-Content -Path "C:\winc-network.json" -Value '{
+  "network_name": "winc-nat",
+  "subnet_range": "172.30.0.0/22",
+  "gateway_address": "172.30.0.1"
+}'
+
+  & "$env:GARDEN_BINPATH\winc-network.exe" --debug --log-format json --action delete --configFile "C:\winc-network.json"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Deleting container network returned error code: $LastExitCode"
+  }
+
+  & "$env:GARDEN_BINPATH\winc-network.exe" --debug --log-format json --action create --configFile "C:\winc-network.json"
+  if ($LASTEXITCODE -ne 0) {
+    throw "Creating container network returned error code: $LastExitCode"
+  }
+
+  Set-NetFirewallProfile -All -DefaultInboundAction Block -DefaultOutboundAction Allow -Enabled True
 }
 
 function Setup-Gopath() {
@@ -156,6 +176,7 @@ $env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
 Setup-Gopath "$PWD/diego-release"
 Install-Ginkgo "$PWD/diego-release"
 Set-GardenRootfs
+Setup-ContainerNetworking
 Setup-Database
 
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
