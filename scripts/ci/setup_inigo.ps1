@@ -36,7 +36,7 @@ function Build-GardenRunc(){
       throw "Syncing winc bosh blobs returned error code: $LastExitCode"
     }
     $mingwPath=(Get-ChildItem "blobs\mingw\x86_64-*.zip").FullName
-    Expand-Archive -Path "$mingwPath" -DestinationPath "$env:WINC_RELEASE_PATH\bin"
+    Expand-Archive -Force -Path "$mingwPath" -DestinationPath "$env:WINC_RELEASE_PATH\bin"
     $env:PATH = "$PWD\bin\mingw64\bin;$env:PATH"
 
     $env:GOPATH="$PWD"
@@ -145,3 +145,4 @@ $env:GARDEN_GOPATH=${env:GOPATH_ROOT}
 # used for routing to apps; same logic that Garden uses.
 # EXTERNAL_ADDRESS=$(ip route get 8.8.8.8 | sed 's/.*src\s\(.*\)\s/\1/;tx;d;:x')
 # export EXTERNAL_ADDRESS
+$env:EXTERNAL_ADDRESS="foo"
