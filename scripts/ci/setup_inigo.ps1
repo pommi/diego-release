@@ -17,6 +17,9 @@ function Build-GardenRunc(){
 
     mkdir -Force "$env:GARDEN_RUNC_PATH\bin"
 
+    $tarPath = (Get-Command tar).source
+    cp -Force $tarPath "$env:GARDEN_BINPATH"
+
     push-location ".\src\guardian"
       go build -mod vendor -o "$env:GARDEN_BINPATH\init.exe" ".\cmd\winit"
       if ($LastExitCode -ne 0) {
