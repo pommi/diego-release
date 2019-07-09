@@ -123,9 +123,9 @@ function Setup-Database() {
   $origCertFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.crt"
   $origKeyFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.key"
 
-  $caFile="C:\mysql-certs\server-ca.crt"
-  $certFile="C:\mysql-certs\server.crt"
-  $keyFile="C:\mysql-certs\server.key"
+  $caFile="C:\\mysql-certs\\server-ca.crt"
+  $certFile="C:\\mysql-certs\\server.crt"
+  $keyFile="C:\\mysql-certs\\server.key"
   mkdir -Force "C:\mysql-certs"
 
   cp $origCaFile $caFile
