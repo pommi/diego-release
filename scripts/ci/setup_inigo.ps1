@@ -165,6 +165,17 @@ ssl-ca=$caFile"
 Restart-Service Mysql
 }
 
+function Setup-Consul {
+  $CONSUL_DIR = "C:/consul"
+  if(!(Test-Path -Path $CONSUL_DIR )) {
+      New-Item -ItemType directory -Path $CONSUL_DIR
+      (New-Object System.Net.WebClient).DownloadFile('https://releases.hashicorp.com/consul/0.7.0/consul_0.7.0_windows_amd64.zip', "$CONSUL_DIR/consul.zip")
+      [System.IO.Compression.ZipFile]::ExtractToDirectory("$CONSUL_DIR/consul.zip", "$CONSUL_DIR")
+  }
+
+  $env:PATH = "$env:PATH;$CONSUL_DIR"
+}
+
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/ginkgo
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/gomega
 
@@ -178,6 +189,7 @@ Install-Ginkgo "$PWD/diego-release"
 Set-GardenRootfs
 Setup-ContainerNetworking
 Setup-Database
+Setup-Consul
 
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
 $env:AUCTIONEER_GOPATH=${env:GOPATH_ROOT}
