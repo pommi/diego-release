@@ -204,5 +204,6 @@ $env:SSH_PROXY_GOPATH=${env:GOPATH_ROOT}
 $env:GARDEN_GOPATH=${env:GOPATH_ROOT}
 
 # used for routing to apps; same logic that Garden uses.
-$ipAddress = Find-NetRoute -RemoteIPAddress "8.8.8.8" | Select-Object IpAddress
-$env:EXTERNAL_ADDRESS=$ipAddress.IpAddress
+$ipAddressObject = Find-NetRoute -RemoteIPAddress "8.8.8.8" | Select-Object IpAddress
+$ipAddress = $ipAddressObject.IpAddress
+$env:EXTERNAL_ADDRESS="$ipAddress".Trim()
