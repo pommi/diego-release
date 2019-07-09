@@ -40,7 +40,7 @@ function Build-GardenRunc(){
     }
     $mingwPath=(Get-ChildItem "blobs\mingw\x86_64-*.zip").FullName
     Expand-Archive -Force -Path "$mingwPath" -DestinationPath "$env:WINC_RELEASE_PATH\bin"
-    $env:PATH = "$PWD\bin\mingw64\bin;$env:PATH"
+    $env:PATH = "$env:WINC_RELEASE_PATH\bin\mingw64\bin;$env:PATH"
 
     $env:GOPATH="$PWD"
 
