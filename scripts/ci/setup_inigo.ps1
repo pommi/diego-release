@@ -206,12 +206,8 @@ Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.clou
 Remove-Item -Recurse -Force -ErrorAction Ignore $PWD/diego-release/src/code.cloudfoundry.org/guardian/vendor/github.com/onsi/gomega
 
 Build-GardenRunc "$PWD\garden-runc-release" "$PWD\winc-release"
-
-$env:ROUTER_GOPATH="$PWD\routing-release"
-$env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
-
-Setup-Gopath "$PWD/diego-release"
 Setup-Envoy "$PWD/envoy-nginx-release"
+Setup-Gopath "$PWD/diego-release"
 Install-Ginkgo "$PWD/diego-release"
 Set-GardenRootfs
 Setup-ContainerNetworking
@@ -219,6 +215,8 @@ Setup-Database
 Setup-Consul
 Setup-DnsNames
 
+$env:ROUTER_GOPATH="$PWD\routing-release"
+$env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
 $env:AUCTIONEER_GOPATH=${env:GOPATH_ROOT}
 $env:BBS_GOPATH=${env:GOPATH_ROOT}
