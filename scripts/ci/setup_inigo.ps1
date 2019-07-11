@@ -4,6 +4,15 @@ trap { $host.SetShouldExit(1) }
 $env:GOROOT="C:\var\vcap\packages\golang-1.12-windows\go"
 $env:PATH= "$env:GOROOT\bin;$env:PATH"
 
+function Setup-DnsNames() {
+  Add-Content -Path "C:\Windows\System32\Drivers\etc\hosts" -Encoding ASCII -Value "
+127.0.0.1 the-cell-id-1-0.service.cf.internal
+127.0.0.1 the-cell-id-2-0.service.cf.internal
+127.0.0.1 the-cell-id-3-0.service.cf.internal
+127.0.0.1 the-cell-id-4-0.service.cf.internal
+"
+}
+
 function Build-GardenRunc(){
 	param([string] $gardenRuncDir, [string] $wincReleaseDir)
 
@@ -146,10 +155,12 @@ function Setup-Database() {
   $origCertFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.crt"
   $origKeyFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.key"
 
-  $caFile="C:\\mysql-certs\\server-ca.crt"
-  $certFile="C:\\mysql-certs\\server.crt"
-  $keyFile="C:\\mysql-certs\\server.key"
-  mkdir -Force "C:\mysql-certs"
+  $mysqlCertsDir = "$env:TEMP\mysql-certs"
+  mkdir -Force $mysqlCertsDir
+
+  $caFile="$mysqlCertsDir\server-ca.crt"
+  $certFile="$mysqlCertsDir\server.crt"
+  $keyFile="$mysqlCertsDir\server.key"
 
   cp $origCaFile $caFile
   cp $origCertFile $certFile
@@ -162,7 +173,7 @@ ssl-cert=$certFile
 ssl-key=$keyFile
 ssl-ca=$caFile"
 
-Restart-Service Mysql
+  Restart-Service Mysql
 }
 
 function Setup-Consul {
@@ -190,6 +201,7 @@ Set-GardenRootfs
 Setup-ContainerNetworking
 Setup-Database
 Setup-Consul
+Setup-DnsNames
 
 $env:APP_LIFECYCLE_GOPATH=${env:GOPATH_ROOT}
 $env:AUCTIONEER_GOPATH=${env:GOPATH_ROOT}
