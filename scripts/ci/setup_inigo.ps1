@@ -118,13 +118,6 @@ function Setup-Gopath() {
 	param([string] $dir)
 
   Push-Location $dir
-    bosh sync-blobs
-    if ($LastExitCode -ne 0) {
-      throw "Syncing diego bosh blobs returned error code: $LastExitCode"
-    }
-
-    # Have a way of copying envoy proxy
-
     $env:GOPATH_ROOT="$PWD"
 
     $env:GOPATH="${env:GOPATH_ROOT}"
@@ -135,6 +128,28 @@ function Setup-Gopath() {
     go install github.com/apcera/gnatsd
     if ($LastExitCode -ne 0) {
       throw "Installing gnatsd returned error code: $LastExitCode"
+    }
+  Pop-Location
+}
+
+function Setup-Envoy() {
+         param([string] $envoyReleaseDir)
+
+  Push-Location $envoyReleaseDir
+    bosh sync-blobs
+    if ($LastExitCode -ne 0) {
+      throw "Syncing envoy bosh blobs returned error code: $LastExitCode"
+    }
+
+    $env:ENVOY_PATH="$env:TEMP\envoy"
+    mkdir -Force "$env:ENVOY_PATH"
+
+    Expand-Archive -Force -Path "$mingwPath" -DestinationPath "$env:ENVOY_PATH"
+
+    $env:GOPATH="$PWD"
+    go build -o "$env:ENVOY_PATH\envoy.exe" "code.cloudfoundry.org/envoy-nginx"
+    if ($LastExitCode -ne 0) {
+      throw "Building envoy.exe process returned error code: $LastExitCode"
     }
   Pop-Location
 }
@@ -196,6 +211,7 @@ $env:ROUTER_GOPATH="$PWD\routing-release"
 $env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
 
 Setup-Gopath "$PWD/diego-release"
+Setup-Envoy "$PWD/envoy-nginx-release"
 Install-Ginkgo "$PWD/diego-release"
 Set-GardenRootfs
 Setup-ContainerNetworking
