@@ -144,7 +144,7 @@ function Setup-Envoy() {
     $env:ENVOY_PATH="$env:TEMP\envoy"
     mkdir -Force "$env:ENVOY_PATH"
 
-    Expand-Archive -Force -Path "$mingwPath" -DestinationPath "$env:ENVOY_PATH"
+    Expand-Archive -Force -Path "blobs\envoy-nginx\envoy-nginx.zip" -DestinationPath "$env:ENVOY_PATH"
 
     $env:GOPATH="$PWD"
     go build -o "$env:ENVOY_PATH\envoy.exe" "code.cloudfoundry.org/envoy-nginx"
