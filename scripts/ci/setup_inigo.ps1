@@ -13,6 +13,13 @@ function Setup-DnsNames() {
 "
 }
 
+function Setup-TempDirContainerAccess() {
+  $rule = New-Object System.Security.AccessControl.FileSystemAccessRule("Users", "ReadAndExecute", "ContainerInherit, ObjectInherit", "None", "Allow")
+  $acl = Get-Acl "$env:TEMP"
+  $acl.AddAccessRule($rule)
+  Set-Acl "$env:TEMP" $acl
+}
+
 function Build-GardenRunc(){
 	param([string] $gardenRuncDir, [string] $wincReleaseDir)
 
@@ -214,6 +221,7 @@ Setup-ContainerNetworking
 Setup-Database
 Setup-Consul
 Setup-DnsNames
+Setup-TempDirContainerAccess
 
 $env:ROUTER_GOPATH="$PWD\routing-release"
 $env:ROUTING_API_GOPATH=$env:ROUTER_GOPATH
