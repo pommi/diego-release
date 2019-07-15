@@ -12,9 +12,16 @@ $dir=[System.IO.Path]::GetDirectoryName($PSScriptRoot)
  Push-Location "${env:GOPATH_ROOT}\src\code.cloudfoundry.org\inigo"
    $PACKAGES_TO_SKIP="docker"
 
-   if ( "$SKIP_PACKAGES" -ne "" ) {
+   if ( "$env:SKIP_PACKAGES" -ne "" ) {
      $PACKAGES_TO_SKIP=$PACKAGES_TO_SKIP + "," + $env:SKIP_PACKAGES
    }
 
-   ginkgo $nodes_flag -r -skipPackage="${PACKAGES_TO_SKIP}" -skip="${SKIP_REGEX}" -failOnPending -randomizeAllSpecs -trace -race -slowSpecThreshold=60 -keepGoing ./cell
+   ginkgo $nodes_flag -r -failOnPending -randomizeAllSpecs -trace -race -slowSpecThreshold=60 -keepGoing ./cell
+   # ginkgo $nodes_flag -r -skipPackage="${PACKAGES_TO_SKIP}" -skip="${env:SKIP_REGEX}" -failOnPending -randomizeAllSpecs -trace -race -slowSpecThreshold=60 -keepGoing
+
+   if ($LASTEXITCODE -ne 0) {
+      Write-Host "Failed to run inigo"
+      exit 1
+   }
+
  Pop-Location

@@ -5,6 +5,7 @@ $env:GOROOT="C:\var\vcap\packages\golang-1.12-windows\go"
 $env:PATH= "$env:GOROOT\bin;$env:PATH"
 
 function Setup-DnsNames() {
+  Write-Host "Setup-DnsNames"
   Add-Content -Path "C:\Windows\System32\Drivers\etc\hosts" -Encoding ASCII -Value "
 127.0.0.1 the-cell-id-1-0.cell.service.cf.internal
 127.0.0.1 the-cell-id-2-0.cell.service.cf.internal
@@ -14,6 +15,7 @@ function Setup-DnsNames() {
 }
 
 function Setup-TempDirContainerAccess() {
+  Write-Host "Setup-TempDirContainerAccess"
   $rule = New-Object System.Security.AccessControl.FileSystemAccessRule("Users", "ReadAndExecute", "ContainerInherit, ObjectInherit", "None", "Allow")
   $acl = Get-Acl "$env:TEMP"
   $acl.AddAccessRule($rule)
@@ -21,9 +23,9 @@ function Setup-TempDirContainerAccess() {
 }
 
 function Build-GardenRunc(){
-	param([string] $gardenRuncDir, [string] $wincReleaseDir)
+  param([string] $gardenRuncDir, [string] $wincReleaseDir)
 
-  Write-Host "Building garden-runc"
+  Write-Host "Building garden-runc-release"
   $env:GARDEN_RUNC_PATH = $gardenRuncDir
   $env:WINC_RELEASE_PATH = $wincReleaseDir
 
@@ -46,6 +48,7 @@ function Build-GardenRunc(){
 
 
   push-location $env:WINC_RELEASE_PATH
+    Write-Host "Building winc-release"
     mkdir -Force "$env:WINC_RELEASE_PATH\bin"
 
     $env:GROOTFS_BINPATH = "$env:GARDEN_BINPATH"
@@ -93,7 +96,11 @@ function Build-GardenRunc(){
 }
 
 function Set-GardenRootfs() {
+  Write-Host "Set-GardenRootfs"
   $env:GARDEN_ROOTFS="docker:///cloudfoundry/windows2016fs:2019"
+  if (-not (Test-Path 'env:GARDEN_ROOTFS')) {
+    throw "Please set GARDEN_ROOTFS environment variable"
+  }
   $env:GROOTFS_STORE_PATH="C:\grootfs-store"
   & "$env:GROOTFS_BINPATH\grootfs.exe" --driver-store "$env:GROOTFS_STORE_PATH" pull "$env:GARDEN_ROOTFS"
   if ($LastExitCode -ne 0) {
@@ -102,6 +109,7 @@ function Set-GardenRootfs() {
 }
 
 function Setup-ContainerNetworking() {
+  Write-Host "Setup-ContainerNetworking"
   Set-Content -Path "C:\winc-network.json" -Value '{
   "network_name": "winc-nat",
   "subnet_range": "172.30.0.0/22",
@@ -122,8 +130,9 @@ function Setup-ContainerNetworking() {
 }
 
 function Setup-Gopath() {
-	param([string] $dir)
+  param([string] $dir)
 
+  Write-Host "Setup-Gopath"
   Push-Location $dir
     $env:GOPATH_ROOT="$PWD"
 
@@ -140,8 +149,9 @@ function Setup-Gopath() {
 }
 
 function Setup-Envoy() {
-         param([string] $envoyReleaseDir)
+ param([string] $envoyReleaseDir)
 
+  Write-Host "Setup-Envoy"
   Push-Location $envoyReleaseDir
     bosh sync-blobs
     if ($LastExitCode -ne 0) {
@@ -162,7 +172,9 @@ function Setup-Envoy() {
 }
 
 function Install-Ginkgo() {
-	param([string] $dir)
+  param([string] $dir)
+
+  Write-Host "Install-Ginkgo"
   Push-Location $dir
     go install github.com/onsi/ginkgo/ginkgo
     if ($LastExitCode -ne 0) {
@@ -173,6 +185,8 @@ function Install-Ginkgo() {
 }
 
 function Setup-Database() {
+  Write-Host "Setup-Database"
+
   $origCaFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server-ca.crt"
   $origCertFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.crt"
   $origKeyFile="$env:GOPATH_ROOT\src\code.cloudfoundry.org\inigo\fixtures\certs\sql-certs\server.key"
@@ -199,6 +213,7 @@ ssl-ca=$caFile"
 }
 
 function Setup-Consul {
+  Write-Host "Setup-Consul"
   $CONSUL_DIR = "C:/consul"
   if(!(Test-Path -Path $CONSUL_DIR )) {
       New-Item -ItemType directory -Path $CONSUL_DIR
@@ -241,3 +256,4 @@ $env:GARDEN_GOPATH=${env:GOPATH_ROOT}
 $ipAddressObject = Find-NetRoute -RemoteIPAddress "8.8.8.8" | Select-Object IpAddress
 $ipAddress = $ipAddressObject.IpAddress
 $env:EXTERNAL_ADDRESS="$ipAddress".Trim()
+

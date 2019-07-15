@@ -29,4 +29,7 @@ fly ${target} execute -p \
     -i diego-release=$PWD \
     -i garden-runc-release=$workspace/garden-runc-release \
     -i routing-release=$workspace/routing-release \
+    -i winc-release=$workspace/winc-release \
+    -i envoy-nginx-release=$workspace/envoy-nginx-release \
+    --tag inigo-windows-worker \
     -- "$@"
