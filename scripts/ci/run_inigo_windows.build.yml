@@ -9,7 +9,7 @@ inputs:
 - name: envoy-nginx-release
 
 params:
-  GINKGO_PARALLEL: "false" # we check for the literal string "true" in the run_inigo script
+  GINKGO_PARALLEL: "true" # we check for the literal string "true" in the run_inigo script
   DEFAULT_EVENTUALLY_TIMEOUT: 2m
   START_CHECK_TIMEOUT_DURATION:
   INIGO_REPEAT_COUNT: 1

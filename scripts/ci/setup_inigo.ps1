@@ -3,6 +3,8 @@ trap { $host.SetShouldExit(1) }
 
 $env:GOROOT="C:\var\vcap\packages\golang-1.12-windows\go"
 $env:PATH= "$env:GOROOT\bin;$env:PATH"
+$env:TMP = "C:\var\vcap\data\tmp"
+$env:TEMP = "C:\var\vcap\data\tmp"
 
 function Setup-DnsNames() {
   Write-Host "Setup-DnsNames"
@@ -53,13 +55,7 @@ function Build-GardenRunc(){
 
     $env:GROOTFS_BINPATH = "$env:GARDEN_BINPATH"
 
-    bosh sync-blobs
-    if ($LastExitCode -ne 0) {
-      throw "Syncing winc bosh blobs returned error code: $LastExitCode"
-    }
-    $mingwPath=(Get-ChildItem "blobs\mingw\x86_64-*.zip").FullName
-    Expand-Archive -Force -Path "$mingwPath" -DestinationPath "$env:WINC_RELEASE_PATH\bin"
-    $env:PATH = "$env:WINC_RELEASE_PATH\bin\mingw64\bin;$env:PATH"
+    $env:PATH = "$env:PATH;C:\var\vcap\packages\mingw64\mingw64\bin"
 
     $env:GOPATH="$PWD"
 
