@@ -131,7 +131,7 @@
 	branch = master
 [submodule "src/code.cloudfoundry.org/auctioneer"]
 	path = src/code.cloudfoundry.org/auctioneer
-	url = https://github.com/cloudfoundry/auctioneer
+	url = https://github.com/pommi/auctioneer
 	branch = master
 [submodule "src/code.cloudfoundry.org/cacheddownloader"]
 	path = src/code.cloudfoundry.org/cacheddownloader
