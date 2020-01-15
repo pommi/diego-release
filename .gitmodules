@@ -123,7 +123,7 @@
 	branch = master
 [submodule "src/code.cloudfoundry.org/auction"]
 	path = src/code.cloudfoundry.org/auction
-	url = https://github.com/cloudfoundry/auction
+	url = https://github.com/pommi/auction
 	branch = master
 [submodule "src/code.cloudfoundry.org/bbs"]
 	path = src/code.cloudfoundry.org/bbs
