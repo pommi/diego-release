@@ -159,7 +159,7 @@
 	branch = master
 [submodule "src/code.cloudfoundry.org/rep"]
 	path = src/code.cloudfoundry.org/rep
-	url = https://github.com/cloudfoundry/rep
+	url = https://github.com/pommi/rep
 	branch = master
 [submodule "src/code.cloudfoundry.org/vizzini"]
 	path = src/code.cloudfoundry.org/vizzini
